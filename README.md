@@ -1,8 +1,8 @@
 ## 移植 PHP 日期时间扩展库
 
 接受一个包含美国英语日期格式的字符串并尝试将其解析为 Unix 时间戳（自 January 1 1970 00:00:00 UTC 起的秒数），
-其值相对于 now 参数给出的时间，如果没有提供 now 参数则用系统当前时间，
-没有提供 ZoneId 默认使用 ZoneId.systemDefault()。
+其值相对于 ts 参数给出的时间，如果没有提供 ts 参数则用系统当前时间，
+没有提供 zoneId 默认使用 ZoneId.systemDefault()。
 
 ```java
 public static Time parse(@NotNull String timeStr);
