@@ -12,7 +12,8 @@ public static Time parse(@NotNull String timeStr, @NotNull ZoneId zoneId, long t
 
 移植自
 
-https://github.com/php/php-src/blob/master/ext/date/lib/parse_date.re
+https://github.com/php/php-src/tree/master/ext/date/lib
+
 https://github.com/derickr/timelib
 
 ## 文档
