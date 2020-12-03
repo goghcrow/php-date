@@ -39,13 +39,13 @@ public class Time {
         return parse(timeStr, ZoneId.systemDefault(), ts);
     }
 
-    /**
-     * php strtotime
-     * @link https://www.php.net/manual/zh/function.strtotime.php
-     */
-    public static Time parse(@NotNull String timeStr, @NotNull LocalDateTime ldt) {
-        return parse(timeStr, Timestamp.valueOf(ldt).getTime());
-    }
+//    /**
+//     * php strtotime
+//     * @link https://www.php.net/manual/zh/function.strtotime.php
+//     */
+//    public static Time parse(@NotNull String timeStr, @NotNull LocalDateTime ldt) {
+//        return parse(timeStr, Timestamp.valueOf(ldt).getTime());
+//    }
 
     /**
      * php strtotime

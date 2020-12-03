@@ -1,6 +1,16 @@
 ## 移植 PHP 时期时间扩展库
 
-> from
+接受一个包含美国英语日期格式的字符串并尝试将其解析为 Unix 时间戳（自 January 1 1970 00:00:00 UTC 起的秒数），
+其值相对于 now 参数给出的时间，如果没有提供 now 参数则用系统当前时间，
+没有提供 ZoneId 默认使用 ZoneId.systemDefault()。
+
+```java
+public static Time parse(@NotNull String timeStr);
+public static Time parse(@NotNull String timeStr, long ts);
+public static Time parse(@NotNull String timeStr, @NotNull ZoneId zoneId, long ts);
+```
+
+移植自
 
 https://github.com/php/php-src/blob/master/ext/date/lib/parse_date.re
 https://github.com/derickr/timelib
@@ -14,12 +24,6 @@ https://www.php.net/manual/zh/datetime.formats.date.php
 https://www.php.net/manual/zh/datetime.formats.compound.php
 https://www.php.net/manual/zh/datetime.formats.relative.php
 
-##
-
-> public static Time parse()
-接受一个包含美国英语日期格式的字符串并尝试将其解析为 Unix 时间戳（自 January 1 1970 00:00:00 UTC 起的秒数），
-其值相对于 now 参数给出的时间，如果没有提供 now 参数则用系统当前时间，
-没有提供 ZoneId 默认使用 ZoneId.systemDefault()。
 
 
 ## 支持解析的格式 - regex
@@ -254,23 +258,24 @@ Sun, 13 Nov 2020 22:56:10 -0800 (PST)
 May 18th 5:05pm
 ```
 
+感恩节
 ```java
-    import static php.date.Time.parse;
+static String date(String fmt, long ts) {
+    return DateTimeFormatter.ofPattern(fmt).format(LocalDateTime.ofEpochSecond(ts, 0, OffsetDateTime.now().getOffset()));
+}
 
-    static String date(String fmt, long ts) {
-        return DateTimeFormatter.ofPattern(fmt).format(LocalDateTime.ofEpochSecond(ts, 0, OffsetDateTime.now().getOffset()));
-    }
+// 今年感恩节
+System.out.println(date("yyyy-MM-dd", Time.parse("fourth thursday of november").epochSecond())); // 2020-11-26
 
-    System.out.println(date("yyyy-MM-dd", Time.parse("fourth thursday of november").epochSecond()));  // 今年感恩节
-    // 2020-11-26
-    System.out.println(date("yyyy-MM-dd", Time.parse("fourth thursday of november 2019").epochSecond()));  // 2019感恩节
-    // 2019-11-28
-    System.out.println(date("yyyy-MM-dd", Time.parse("fourth thursday of november 2018").epochSecond()));  // 2018今年感恩节
-    // 2018-11-22
+// 2019感恩节
+System.out.println(date("yyyy-MM-dd", Time.parse("fourth thursday of november 2019").epochSecond())); // 2019-11-28
+
+// 2018今年感恩节
+System.out.println(date("yyyy-MM-dd", Time.parse("fourth thursday of november 2018").epochSecond())); // 2018-11-22
 
 ```
 
-// 每月最后一天
+每月最后一天
 ```java
 String start = "2016-05";
 long now = Instant.now().getEpochSecond();
@@ -286,7 +291,8 @@ while (true) {
 }
 ```
 
-```
+"first day of" 和 "last day of"
+```java
 // https://www.laruence.com/2018/07/31/3207.html
 // 1. 先做-1 month, 那么当前是07-31, 减去一以后就是06-31.
 // 2. 再做日期规范化, 因为6月没有31号, 所以就好像2点60等于3点一样, 6月31就等于了7月1
@@ -305,7 +311,7 @@ System.out.println(date("yyyy-MM-dd", Time.parse("2020-07-31 last day of -1 mont
 // 2020-06-30
 ```
 
-## 问题
+## 已知问题
 
 - 没有百分之百兼容，做了一些改进，见代码注释
     - 时区 offset 表示省略分钟时小时不符合 24 小时格式, 按分钟处理
