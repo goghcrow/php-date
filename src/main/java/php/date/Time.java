@@ -2,9 +2,7 @@ package php.date;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +15,7 @@ import static php.date.Time.ZoneType.*;
  * PHP 时期时间扩展
  *
  * 移植自
- *  https://github.com/php/php-src/blob/master/ext/date/lib/parse_date.re
+ *  https://github.com/php/php-src/tree/master/ext/date/lib
  *  https://github.com/derickr/timelib
  *
  * 文档
