@@ -306,7 +306,7 @@ public class Parser {
     static int lookup_month(String str) {
         Integer m = tblMouth.get(str.toLowerCase());
         if (m == null) {
-            throw new RuntimeException("不支持的月份描述 " + str);
+            throw new TimeException("不支持的月份描述 " + str);
         } else {
             return m;
         }
@@ -315,7 +315,7 @@ public class Parser {
     static int lookup_weekday(String str) {
         Integer w = tblWeekday.get(str.toLowerCase());
         if (w == null) {
-            throw new RuntimeException("不支持的星期描述 " + str);
+            throw new TimeException("不支持的星期描述 " + str);
         } else {
             return w;
         }
@@ -817,7 +817,7 @@ public class Parser {
             time.zone(matcher.group(7));
         });
 
-        register("year4", "^" + reYear4, (time, matcher) -> { // TODO ^
+        register("year4", "^" + reYear4, (time, matcher) -> {
             assert matcher.groupCount() == 1;
             time.y = intval(matcher.group(1));
         });

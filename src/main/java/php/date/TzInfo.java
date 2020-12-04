@@ -128,7 +128,7 @@ class TzInfo {
             InputStream is = TzInfo.class.getClassLoader().getResourceAsStream("php/timezonedb.dta");
             tzdb = IOUtils.readFully(is, -1, false);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new TimeException(e);
         }
     }
 
