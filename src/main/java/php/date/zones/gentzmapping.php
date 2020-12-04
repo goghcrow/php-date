@@ -855,7 +855,7 @@ foreach ($mapping as $key => $test) {
 
 $file = __DIR__ . "/../TzMapping.java";
 file_put_contents($file, <<<JAVA
-package php;
+package php.date;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

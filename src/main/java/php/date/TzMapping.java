@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 自动生成代码，请勿修改
  * @author xiaofeng
  * @version 2020d
- * @since 2020-12-03 15:08:40
+ * @since 2020-12-04 12:35:51
  */
 @SuppressWarnings("SpellCheckingInspection")
 class TzMapping {
