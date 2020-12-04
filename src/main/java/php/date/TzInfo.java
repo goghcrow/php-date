@@ -5,17 +5,14 @@ import sun.misc.IOUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.SeekableByteChannel;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 自动生成代码，请勿修改
  * @author xiaofeng
  * @version 2020d
- * @since 2020-12-04 12:35:50
+ * @since 2020-12-04 15:29:01
  */
 @SuppressWarnings("SpellCheckingInspection")
 class TzInfo {
@@ -115,53 +112,29 @@ class TzInfo {
     }
 
     static TzInfo of1(String name)  {
-        try {
-            Objects.requireNonNull(name);
-            Long val = table.get(name);
-            if (val == null) {
-                throw new TimeException("不支持的时区 " + name);
-            }
-            int pos = (int) (val >>> 32);
-            int sz = (int) (val & 0xffffffffL);
-            return parse_tz_from_db(name, pos, sz);
-        } catch (IOException e) {
-            throw new TimeException(e);
+        Objects.requireNonNull(name);
+        Long val = table.get(name);
+        if (val == null) {
+            throw new TimeException("不支持的时区 " + name);
         }
+        int pos = (int) (val >>> 32);
+        int sz = (int) (val & 0xffffffffL);
+        return parse_tz_from_db(name, pos, sz);
     }
 
-//    final static Path tzDbPath;
-//    static {
-//        try {
-//            URI path = Objects.requireNonNull(TzInfo.class.getClassLoader().getResource("php/timezonedb.dta")).toURI();
-//            tzDbPath = Paths.get(path);
-//        } catch (NullPointerException | URISyntaxException e) {
-//            throw new TimeException(e);
-//        }
-//    }
-    final static SeekableByteChannel tzDbCh;
+    final static byte[] tzdb;
     static {
-        InputStream is = TzInfo.class.getClassLoader().getResourceAsStream("php/timezonedb.dta");
-        tzDbCh = new MemoryChannel(is);
-    }
-
-    static TzInfo parse_tz_from_db(String name, int pos, int sz) throws IOException {
-        // try (SeekableByteChannel tzDbCh = Files.newByteChannel(tzDbPath, StandardOpenOption.READ)) {
-        // todo reuse buf
-        ByteBuffer buf = ByteBuffer.allocateDirect(sz);
-        synchronized (TzInfo.class) {
-            tzDbCh.position(pos);
-            int read = tzDbCh.read(buf);
-            if (read != sz) {
-                throw new AssertionError();
-            }
+        try {
+            InputStream is = TzInfo.class.getClassLoader().getResourceAsStream("php/timezonedb.dta");
+            tzdb = IOUtils.readFully(is, -1, false);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        buf.rewind();
-        TzInfo tzInfo = parse_tz(name, Bytes.of(buf));
-        buf.flip();
-        return tzInfo;
-        // }
     }
 
+    static TzInfo parse_tz_from_db(String name, int pos, int sz) {
+        return parse_tz(name, Bytes.of(ByteBuffer.wrap(tzdb, pos, sz).asReadOnlyBuffer()));
+    }
 
     // !!! 参照 timelib 自己做的二进制格式解析 !!!
     static TzInfo parse_tz(String name, Bytes bytes) {
@@ -312,7 +285,6 @@ class TzInfo {
                 bc, new Loc(countryCode, latitude, longitude, comments));
     }
 
-
     static class Bytes {
         ByteBuffer buf;
         Bytes(ByteBuffer buf) {  this.buf = buf;  }
@@ -331,68 +303,6 @@ class TzInfo {
         long u4()  { return (long) buf.getInt() & 0xffffffffL; }
         void skip(int n) { pos(pos() + n); }
         byte[] read(int n) {  byte[] bytes = new byte[n]; buf.get(bytes); return bytes;  }
-    }
-    static class MemoryChannel implements SeekableByteChannel {
-        final AtomicBoolean closed = new AtomicBoolean();
-        byte[] data;
-        int position, size;
-        MemoryChannel(final byte[] data) {
-            this.data = data;
-            size = data.length;
-        }
-        MemoryChannel(InputStream is) {
-            this(readFully(is));
-        }
-        static byte[] readFully(InputStream is) {
-            try {
-                return IOUtils.readFully(is, -1, false);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        @Override public long position() { return position; }
-        @Override public long size() { return size; }
-        @Override public void close() { closed.set(true); }
-        @Override public boolean isOpen() { return !closed.get(); }
-        @Override public int write(final ByteBuffer b) { throw new UnsupportedOperationException(); }
-        @Override
-        public SeekableByteChannel position(final long newPosition) throws IOException {
-            ensureOpen();
-            assert newPosition >= 0L && newPosition <= Integer.MAX_VALUE;
-            position = (int) newPosition;
-            return this;
-        }
-        @Override
-        public SeekableByteChannel truncate(final long newSize) {
-            assert newSize >= 0L && newSize <= Integer.MAX_VALUE;
-            if (size > newSize) {
-                size = (int) newSize;
-            }
-            if (position > newSize) {
-                position = (int) newSize;
-            }
-            return this;
-        }
-        @Override
-        public int read(final ByteBuffer buf) throws IOException {
-            ensureOpen();
-            int wanted = buf.remaining();
-            final int possible = size - position;
-            if (possible <= 0) {
-                return -1;
-            }
-            if (wanted > possible) {
-                wanted = possible;
-            }
-            buf.put(data, position, wanted);
-            position += wanted;
-            return wanted;
-        }
-        void ensureOpen() throws ClosedChannelException {
-            if (!isOpen()) {
-                throw new ClosedChannelException();
-            }
-        }
     }
 
     static Map<String, Long> table;

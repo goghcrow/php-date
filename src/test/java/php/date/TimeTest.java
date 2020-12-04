@@ -14,7 +14,7 @@ import static php.date.Time.parse;
 
 
 /**
- * todo  通过打印把测试用例输出成 json, 做成表驱动的测试
+ * todo table driven
  */
 public class TimeTest {
 
