@@ -233,7 +233,7 @@ public class Parser {
         tbl.put("ninth", 9);
         tbl.put("tenth", 10);
         tbl.put("eleventh", 11);
-        tbl.put("twelfth", 1);
+        tbl.put("twelfth", 12);
         tblRelative = Collections.unmodifiableMap(tbl);
     }
 
