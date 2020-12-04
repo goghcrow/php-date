@@ -20,26 +20,35 @@ public class TimeTest {
 
     @Test
     public void playground() {
+        Time now = parse("now");
+        ZoneOffset offset = ZoneId.systemDefault().getRules().getOffset(Instant.now());
+        System.out.println("ts      " + now.epochSecond());
+        System.out.println("ldt     " + now.localDateTime().toInstant(offset).getEpochSecond());
+        System.out.println("instant " + now.instant().getEpochSecond());
+        System.out.println("zdt     " + now.zonedDateTime().toLocalDateTime().toInstant(offset).getEpochSecond());
+
 //        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Oslo"));
 //        java_strtotime("+99999-01-01T00:00:00");
 
 
+
+    }
+
+    @Test
+    public void test_first_last_day_of() {
         // https://www.laruence.com/2018/07/31/3207.html
         // 1. 先做-1 month, 那么当前是07-31, 减去一以后就是06-31.
         // 2. 再做日期规范化, 因为6月没有31号, 所以就好像2点60等于3点一样, 6月31就等于了7月1
 
         // 现象
-        System.out.println(date("yyyy-MM-dd", Time.parse("2020-07-31 -1 month").epochSecond()));
-        // output 2020-07-01
+        Assert.assertEquals(date("yyyy-MM-dd", Time.parse("2020-07-31 -1 month").epochSecond()), "2020-07-01");
 
         // 原因
-        System.out.println(date("yyyy-MM-dd", Time.parse("2020-06-31").epochSecond()));
-        // output  2020-07-01
+        Assert.assertEquals(date("yyyy-MM-dd", Time.parse("2020-06-31").epochSecond()), "2020-07-01");
 
         // 解决方式
         // "first day of" 和 "last day of", 限定好不要让date自动"规范化":
-        System.out.println(date("yyyy-MM-dd", Time.parse("2020-07-31 last day of -1 month").epochSecond()));
-        // 2020-06-30
+        Assert.assertEquals(date("yyyy-MM-dd", Time.parse("2020-07-31 last day of -1 month").epochSecond()), "2020-06-30");
     }
 
 
@@ -2049,7 +2058,7 @@ public class TimeTest {
     }
     private static long java_strtotime(String str, String zoneId, long ts) {
         System.out.print("[java][" + zoneId + "] " + str + " => ");
-        Time saturday_this_week = parse(str, ZoneId.of(zoneId), ts);
+        Time saturday_this_week = parse(str, zoneId, ts);
         long r = saturday_this_week.epochSecond();
         System.out.println(r);
         return r;

@@ -2,8 +2,8 @@ package php.date;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Instant;
-import java.time.ZoneId;
+import java.sql.Timestamp;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -28,49 +28,48 @@ import static php.date.Time.ZoneType.*;
  */
 @SuppressWarnings("UnusedReturnValue")
 public class Time {
-
     /**
      * php strtotime
      * @link https://www.php.net/manual/zh/function.strtotime.php
      */
-    public static Time parse(@NotNull String timeStr, long ts) {
-        return parse(timeStr, ZoneId.systemDefault(), ts);
-    }
-
-//    /**
-//     * php strtotime
-//     * @link https://www.php.net/manual/zh/function.strtotime.php
-//     */
-//    public static Time parse(@NotNull String timeStr, @NotNull LocalDateTime ldt) {
-//        return parse(timeStr, Timestamp.valueOf(ldt).getTime());
-//    }
-
-    /**
-     * php strtotime
-     * @link https://www.php.net/manual/zh/function.strtotime.php
-     */
-    public static Time parse(@NotNull String timeStr) {
-        return parse(timeStr, Instant.now().getEpochSecond());
+    public static Time parse(@NotNull String time_str) {
+        return parse(time_str, Instant.now().getEpochSecond());
     }
 
     /**
      * php strtotime
      * @link https://www.php.net/manual/zh/function.strtotime.php
      */
-    public static Time parse(@NotNull String timeStr, @NotNull ZoneId zoneId, long ts) {
-        Objects.requireNonNull(timeStr);
-        TimeException.setLastTimeStr(timeStr);
+    public static Time parse(@NotNull String time_str, long utc_ts) {
+        return parse(time_str, ZoneId.systemDefault().getId(), utc_ts);
+    }
+
+    /**
+     * php strtotime
+     * @link https://www.php.net/manual/zh/function.strtotime.php
+     */
+    public static Time parse(@NotNull String time_str, @NotNull ZonedDateTime zdt) {
+        return parse(time_str, zdt.getZone().getId(), Timestamp.valueOf(zdt.toLocalDateTime()).getTime());
+    }
+
+    /**
+     * php strtotime
+     * @link https://www.php.net/manual/zh/function.strtotime.php
+     */
+    public static Time parse(@NotNull String time_str, @NotNull String zone_id, long zoned_ts) {
+        Objects.requireNonNull(time_str);
+        TimeException.setLastTimeStr(time_str);
 
         Time now = new Time();
 
-        TzInfo tz = TzInfo.of(zoneId.getId());
+        TzInfo tz = TzInfo.of(zone_id);
         now.tz_info = tz;
         now.zone_type = ZoneType.ID;
 
-        UnixTime2Time.unixtime2local(now, ts);
+        UnixTime2Time.unixtime2local(now, zoned_ts);
 
         Time time = new Time();
-        String str = timeStr;
+        String str = time_str;
         while (str.length() > 0) {
             String matched = Parser.match(time, str);
             str = str.substring(matched.length());
@@ -78,12 +77,12 @@ public class Time {
 
         if (time.have_time && time.h != UNSET && time.i != UNSET && time.s != UNSET) {
             if (!DayOfWeek.valid_time(time.h, time.i, time.s)) {
-                time.warnings.add(new Warning(Warning.WARN_INVALID_TIME, "错误的时间 " + timeStr));
+                time.warnings.add(new Warning(Warning.WARN_INVALID_TIME, "错误的时间 " + time_str));
             }
         }
         if (time.have_date && time.y != UNSET && time.m != UNSET && time.d != UNSET) {
             if (!DayOfWeek.valid_date(time.y, time.m, time.d)) {
-                time.warnings.add(new Warning(Warning.WARN_INVALID_DATE, "错误的日期 " + timeStr));
+                time.warnings.add(new Warning(Warning.WARN_INVALID_DATE, "错误的日期 " + time_str));
             }
         }
 
@@ -106,9 +105,9 @@ public class Time {
      * php mktime
      * @link https://www.php.net/manual/en/function.mktime.php
      */
-    public static Time make(String zoneId, int hour, Integer min, Integer sec, Integer month, Integer day, Integer year) {
+    public static Time make(@NotNull String zone_id, int hour, Integer min, Integer sec, Integer month, Integer day, Integer year) {
         Time now = new Time();
-        TzInfo timeZone = TzInfo.of(zoneId);
+        TzInfo timeZone = TzInfo.of(zone_id);
         now.tz_info = timeZone;
         now.zone_type = ZoneType.ID;
         UnixTime2Time.unixtime2local(now, Instant.now().getEpochSecond());
@@ -288,6 +287,14 @@ public class Time {
 
     public Instant instant() {
         return Instant.ofEpochSecond(sse, us * 1000);
+    }
+
+    public ZonedDateTime zonedDateTime() {
+        return instant().atZone(ZoneId.systemDefault());
+    }
+
+    public LocalDateTime localDateTime() {
+        return zonedDateTime().toLocalDateTime();
     }
 
 
