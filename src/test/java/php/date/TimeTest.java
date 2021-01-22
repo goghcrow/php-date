@@ -20,6 +20,8 @@ public class TimeTest {
 
     @Test
     public void playground() {
+        System.out.println(parse("")); // now
+
         Time now = parse("now");
         ZoneOffset offset = ZoneId.systemDefault().getRules().getOffset(Instant.now());
         System.out.println("ts      " + now.epochSecond());

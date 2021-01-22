@@ -265,6 +265,11 @@ public class Time {
 
     List<Warning> warnings;
 
+    @Override
+    public String toString() {
+        return zonedDateTime().toString();
+    }
+
     Time() {
         y = m = d = h = i = s = us = z = UNSET;
         dst = UNSET;

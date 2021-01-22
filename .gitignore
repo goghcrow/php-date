@@ -79,7 +79,6 @@ dependency-reduced-pom.xml
 
 *.iml
 logs
-*.j.desugar
 
 
 src/main/java/php/date/zones/version-info.txt

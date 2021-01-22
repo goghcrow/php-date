@@ -330,3 +330,9 @@ System.out.println(date("yyyy-MM-dd", Time.parse("2020-07-31 last day of -1 mont
 - 实现其他 php 日期函数 e.g. date()
 - 继续移植 其他功能 e.g. interval
 - php没有遵循ISO8601, 时间戳精确到 ms, 调整到 ms 精度 到 ns
+
+## 打赏
+
+如果觉得对你有用，可以赞助我一杯咖啡.
+
+![alipay](https://raw.githubusercontent.com/goghcrow/resources/main/images/alipay.png)
